@@ -25,13 +25,13 @@ public class FXMLController {
     private URL location;
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxMese"
-    private ComboBox<?> boxMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxGiorno"
-    private ComboBox<?> boxGiorno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxGiorno; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnCreaReteCittadina"
     private Button btnCreaReteCittadina; // Value injected by FXMLLoader
@@ -44,14 +44,72 @@ public class FXMLController {
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
+    
+    
+    @FXML
+    void cambioAnno(ActionEvent event) {
+    	
+    	this.model.creaGrafo(this.boxAnno.getValue());
+    	this.boxMese.getItems().setAll(this.model.getListaMesi(this.boxAnno.getValue()));
+    	this.boxGiorno.getItems().clear();
+
+    }
+
+    @FXML
+    void cambioMese(ActionEvent event) {
+    	
+    	if(this.boxMese.getValue()!=null) {
+    		this.boxGiorno.getItems().setAll(this.model.getListaGiorni(this.boxAnno.getValue(), this.boxMese.getValue()));
+    	}
+
+    }
+
 
     @FXML
     void doCreaReteCittadina(ActionEvent event) {
+    	
+    	if(this.boxAnno.getValue()==null) {
+    		this.txtResult.setText("Selezionare un'anno.");
+    		return;
+    	}
+    	
+    	//this.model.creaGrafo(this.boxAnno.getValue());
+    	this.txtResult.clear();
+    	this.txtResult.appendText(this.model.reteCittadina());
 
     }
 
     @FXML
     void doSimula(ActionEvent event) {
+    	
+    	if(this.boxAnno.getValue()==null) {
+    		this.txtResult.setText("Selezionare un'anno.");
+    		return;
+    	}
+    	if(this.boxMese.getValue()==null) {
+    		this.txtResult.setText("Selezionare un mese.");
+    		return;
+    	}
+    	if(this.boxGiorno.getValue()==null) {
+    		this.txtResult.setText("Selezionare un giorno.");
+    		return;
+    	}
+    	
+    	int N = 0;
+    	try {
+    		N = Integer.parseInt(this.txtN.getText());
+    	}catch(NumberFormatException ne) {
+    		this.txtResult.setText("Inserire un numero compreso tra 1 e 10.");
+    		return;
+    	}
+    	
+    	if(N < 1 || N > 10) {
+    		this.txtResult.setText("Inserire un numero compreso tra 1 e 10.");
+    		return;
+    	}
+    	
+    	int n = this.model.getEventiMalGestiti(this.boxAnno.getValue(), this.boxMese.getValue(), this.boxGiorno.getValue(), N);
+    	this.txtResult.appendText("Il numero di eventi mal getsiti è: "+n+"\n");
 
     }
 
@@ -69,5 +127,6 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.boxAnno.getItems().addAll(this.model.getListaAnni());
     }
 }
